@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+</head>
+
+<body>
+
+<div ng-app="" ng-controller="formController" ng-init="firstload()">
+ 
+
+<h1>Quiz</h1>
+
+<table>
+<tr>
+  <th>Question</th>
+  <th>Answer</th>
+  <th>Delete</th>
+</tr>
+ 
+  <tr ng-repeat="x in allques">
+    <td> {{x.question}} </td>     
+    <td> {{x.answer}} </td> 
+   <td> <button ng-click="delete($index)">Delete</button> </td>
+    <br> <br>
+  </tr>
+
+</table>
+
+<br><br>
+
+<h2>Add new question:</h2>
+<form accept-charset="UTF-8" name="myForm" >
+    Question:<br>
+    <input  type="text" name="question" ng-model="question" required>
+    <span ng-show="myForm.question.$error.required">required.</span><br>
+    Answer:<br>
+    <input  type="text" name="answer" ng-model="answer" required>
+    <span ng-show="myForm.answer.$error.required">required.</span>
+    <br><br>
+   Question: {{question}}       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Answer: {{answer}}   <br><br><br>
+    <button  ng-click="submit()" ng-disabled="myForm.question.$invalid || myForm.answer.$invalid" >Submit</button>
+    <button ng-click="newques()">Clear</button>
+    <br>
+   
+</form>
+</div>
+
+<script>
+ function formController ($scope, $http){
+      $scope.question = "what?";
+      $scope.answer = "one";
+
+      $scope.newques=function(){
+        $scope.question = "";
+        $scope.answer = "";
+      }
+
+      $scope.submit = function(item, event) {
+               console.log("--> Submitting form");
+      var q1 = {
+          question : $scope.question
+          ,answer  : $scope.answer
+       };
+
+       var responsePromise = $http.post("/quizes",q1, {});
+       responsePromise.success(function(dataFromServer, status, headers, config) {
+          if(dataFromServer=='question not saved. Please try again'){
+            alert(dataFromServer);
+          }
+          else{
+            $scope.allques = dataFromServer;
+          }
+       });
+        responsePromise.error(function(data, status, headers, config) {
+          alert("Submitting form failed!");
+       });
+      };
+
+      $scope.firstload = function(){
+        var responsePromise2 = $http.get("/quizes");
+       responsePromise2.success(function(dataFromServer2, status, headers, config) {
+         
+            $scope.allques = dataFromServer2;
+          
+       });
+        responsePromise.error(function(data, status, headers, config) {
+          alert("page not loaded properly");
+       });
+      }
+      
+      $scope.delete = function(idx){
+        var ques1 = $scope.allques[idx];
+        var q2 = {id : ques1.id};
+         
+        var responsePromise3 = $http.post("/quizes/delete",q2, {});
+       responsePromise3.success(function(dataFromServer3, status, headers, config) {
+
+             $scope.allques.splice(idx, 1);    
+       });
+        responsePromise.error(function(data, status, headers, config) {
+          alert("delete unsuccessful");
+       });
+      }    
+
+    };
+</script>
+
+</body>
+</html>

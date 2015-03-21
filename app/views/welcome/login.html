@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js">
+  </script>
+<title>Facebook Login JavaScript Example</title>
+<meta charset="UTF-8">
+</head>
+<body>
+<script>
+
+  // This is called with the results from from FB.getLoginStatus().
+  function statusChangeCallback(response) {
+    console.log('statusChangeCallback');
+    console.log(response);
+    // The response object is returned with a status field that lets the
+    // app know the current login status of the person.
+    // Full docs on the response object can be found in the documentation
+    // for FB.getLoginStatus().
+    if (response.status === 'connected') {
+      // Logged into your app and Facebook.
+      document.getElementById('logged').style.display = 'block';
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('logout').style.display = 'block';
+      testAPI();
+    } else if (response.status === 'not_authorized') {
+      // The person is logged into Facebook, but not your app.
+      document.getElementById('status').innerHTML = 'Please log ' +
+        'into this app.';
+        document.getElementById('logged').style.display = 'none';
+        document.getElementById('login').style.display = 'block';
+        document.getElementById('logout').style.display = 'none';
+    } else {
+      // The person is not logged into Facebook, so we're not sure if
+      // they are logged into this app or not.
+      document.getElementById('status').innerHTML = 'Please log ' +
+        'into Facebook.';
+        document.getElementById('logged').style.display = 'none';
+        document.getElementById('login').style.display = 'block';
+        document.getElementById('logout').style.display = 'none';
+    }
+  }
+
+  // This function is called when someone finishes with the Login
+  // Button.  See the onlogin handler attached to it in the sample
+  // code below.
+  function checkLoginState() {
+    FB.getLoginStatus(function(response) {
+      statusChangeCallback(response);
+    });
+  }
+
+  window.fbAsyncInit = function() {
+  FB.init({
+    appId      : '586651684804941',
+    cookie     : true,  // enable cookies to allow the server to access 
+                        // the session
+    xfbml      : true,  // parse social plugins on this page
+    version    : 'v2.2' // use version 2.2
+  });
+
+ 
+  FB.getLoginStatus(function(response) {
+    statusChangeCallback(response);
+  });
+
+  };
+
+  // Load the SDK asynchronously
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+
+  // Here we run a very simple test of the Graph API after login is
+  // successful.  See statusChangeCallback() for when this call is made.
+  function testAPI() {
+    console.log('Welcome!  Fetching your information.... ');
+    FB.api('/me', function(response) {
+      console.log('Successful login for: ' + response.name);
+      document.getElementById('status').innerHTML =
+        'Thanks for logging in, ' + response.name + '!';
+    });
+  }
+
+   function fbLogoutUser() {
+    FB.getLoginStatus(function(response) {
+        if (response && response.status === 'connected') {
+            FB.logout(function(response) {
+                document.location.reload();
+            });
+        }
+    });
+   }
+
+
+</script>
+
+
+<fb:login-button id="login" style="display:none;" scope="public_profile,email" onlogin="checkLoginState();">
+</fb:login-button>
+
+<button id="logout" style="display:none;" onclick="fbLogoutUser();">Logout</button> 
+
+<div id="status">
+</div>
+
+<div id="logged" style="display:none;">
+
+<div ng-app="" ng-controller="formController" ng-init="firstload()">
+ 
+<h1>Quiz</h1>
+
+<table>
+<tr>
+  <th>Question</th>
+  <th>Answer</th>
+  <th>Delete</th>
+</tr>
+ 
+  <tr ng-repeat="x in allques">
+    <td> {{x.question}} </td>     
+    <td> {{x.answer}} </td> 
+   <td> <button ng-click="delete($index)">Delete</button> </td>
+    <br> <br>
+  </tr>
+
+</table>
+
+<br><br>
+
+<h2>Add new question:</h2>
+<form accept-charset="UTF-8" name="myForm" >
+    Question:<br>
+    <input  type="text" name="question" ng-model="question" required>
+    <span ng-show="myForm.question.$error.required">required.</span><br>
+    Answer:<br>
+    <input  type="text" name="answer" ng-model="answer" required>
+    <span ng-show="myForm.answer.$error.required">required.</span>
+    <br><br>
+   Question: {{question}}       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Answer: {{answer}}   <br><br><br>
+    <button  ng-click="submit()" ng-disabled="myForm.question.$invalid || myForm.answer.$invalid" >Submit</button>
+    <button ng-click="newques()">Clear</button>
+    <br>
+   
+</form>
+
+</div>
+</div>
+
+<script>
+ function formController ($scope, $http){
+      $scope.question = "what?";
+      $scope.answer = "one";
+
+      $scope.newques=function(){
+        $scope.question = "";
+        $scope.answer = "";
+      }
+
+      $scope.submit = function(item, event) {
+               console.log("--> Submitting form");
+      var q1 = {
+          question : $scope.question
+          ,answer  : $scope.answer
+       };
+
+       var responsePromise = $http.post("/quizes",q1, {});
+       responsePromise.success(function(dataFromServer, status, headers, config) {
+          if(dataFromServer=='question not saved. Please try again'){
+            alert(dataFromServer);
+          }
+          else{
+            $scope.allques = dataFromServer;
+          }
+       });
+        responsePromise.error(function(data, status, headers, config) {
+          alert("Submitting form failed!");
+       });
+      };
+
+      $scope.firstload = function(){
+        var responsePromise2 = $http.get("/quizes");
+       responsePromise2.success(function(dataFromServer2, status, headers, config) {
+         
+            $scope.allques = dataFromServer2;
+          
+       });
+        responsePromise.error(function(data, status, headers, config) {
+          alert("page not loaded properly");
+       });
+      }
+      
+      $scope.delete = function(idx){
+        var ques1 = $scope.allques[idx];
+        var q2 = {id : ques1.id};
+         
+        var responsePromise3 = $http.post("/quizes/delete",q2, {});
+       responsePromise3.success(function(dataFromServer3, status, headers, config) {
+
+             $scope.allques.splice(idx, 1);    
+       });
+        responsePromise.error(function(data, status, headers, config) {
+          alert("delete unsuccessful");
+       });
+      }    
+
+    };
+</script>
+
+
+</body>
+</html>

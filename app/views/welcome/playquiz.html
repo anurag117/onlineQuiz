@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+</head>
+
+<body>
+
+<div ng-app="" ng-controller="listController" ng-init="firstload()">
+ 
+
+<h1>Quiz</h1>
+ 
+  <div ng-show="x<allques.length">
+    
+    Question {{x+1}}: {{allques[x].question}} <br>  
+    Answer:  <input  type="text" ng-model="allques[x].ansclient" ng-disabled="allques[x].disable">
+
+    <button ng-click="submit(x)" ng-disabled="allques[x].disable">Submit</button>
+    <span>{{allques[x].result}} </span>
+    <br><br>
+    <button ng-click="next() " >Next</button>
+    <button ng-click="prev() " ng-disabled="x==0">Previous</button><br><br>
+    Your score:  {{score}}
+  </div>
+
+  <div ng-show="x==allques.length">
+    <b>Your total score: {{score}} </b><br><br>
+    <b>Thank you</b>
+  </div>
+
+
+</div>
+
+<script>
+ function listController ($scope, $http){
+
+  $scope.score=0;
+  $scope.x=0;
+
+  $scope.submit=function(x){
+    $scope.allques[x].disable=true;
+    if($scope.allques[x].ansclient==$scope.allques[x].answer){
+      $scope.allques[x].result="Correct";
+      $scope.score++;
+    }
+    else{
+      $scope.allques[x].result="Wrong";
+    }
+  }
+
+   $scope.next=function(){
+    $scope.x++;
+   } 
+
+   $scope.prev=function(){
+    $scope.x--;
+   }
+
+    $scope.firstload = function(){
+        var responsePromise2 = $http.get("/quizes");
+       responsePromise2.success(function(dataFromServer2, status, headers, config) {
+         
+            $scope.allques = dataFromServer2;
+          
+       });
+        responsePromise.error(function(data, status, headers, config) {
+          alert("page not loaded properly");
+       });
+      }
+
+ }
+ </script>
+
+</body>
+</html>

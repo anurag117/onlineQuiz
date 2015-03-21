@@ -1,0 +1,7 @@
+Online quiz using AngularJS on frontend and Ruby on Rails on backend and login with facebook API.
+
+login page at localhost:3000
+
+playquiz page at http://localhost:3000/playquiz
+
+html views in  \app\views\welcome
