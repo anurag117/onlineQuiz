@@ -4,4 +4,4 @@ login page at localhost:3000
 
 playquiz page at http://localhost:3000/playquiz
 
-html views in  \app\views\welcome
+html views in  /app/views/welcome
